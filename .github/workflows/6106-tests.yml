@@ -1,0 +1,63 @@
+name: 6106-tests
+
+on:
+  push:
+    branches:
+      - main
+      - actions
+
+jobs:
+  check_correctness:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Checkout Student Software
+        uses: actions/checkout@v2
+        with:
+          repository: MIT-6-106/student_software
+          ref: main
+          path: student_software
+
+      - name: Restore Cache
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: /opt/6106
+          key: cache-test
+
+      - name: Symlink Cached Dependencies
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          sudo ln -sf /opt/6106/opencilk/bin/clang /usr/bin/clang-6106
+          sudo ln -sf /opt/6106/submit.py /usr/bin/telerun
+          sudo ln -sf /opt/6106/authorize-telerun.sh /usr/bin/authorize-telerun
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          cd student_software
+          ./install.sh
+
+      - name: Authorize Telerun
+        env:
+          TELERUN_TOKEN: ${{ secrets.TELERUN_TOKEN }}
+        run: authorize-telerun github_action $TELERUN_TOKEN
+
+      - name: Build
+        run: |
+          cd snailspeed
+          make clean
+          make
+
+      - name: Check Correctness
+        run: |
+          cd snailspeed
+          ./rotate -t correctness -x
+
+      - name: Find Tier
+        run: |
+          cd snailspeed
+          telerun ./rotate -t tiers -l -1 -M 57
