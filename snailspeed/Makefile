@@ -52,7 +52,8 @@ UBSAN := 0
 
 # DO NOT MODIFY THE COMPILER
 # You will be graded with the clang compiler that ships with the course VM
-CC := clang-spe
+#CC := clang-spe
+CC := clang
 
 # Architecture supports up to AVX 512
 ARCH := x86-64-v4

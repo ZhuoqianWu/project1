@@ -24,7 +24,6 @@
 #include "my_utils.h"
 #include <stdint.h>
 #include <string.h> 
-
 uint64_t bit_reverse64(uint64_t x) {
     x = ((x & 0x5555555555555555ULL) << 1) | ((x >> 1) & 0x5555555555555555ULL);
     x = ((x & 0x3333333333333333ULL) << 2) | ((x >> 2) & 0x3333333333333333ULL);
